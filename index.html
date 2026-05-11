@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mastermind - Claudius Art Studio</title>
+  <style>
+    :root {
+      --fond: #140f0a;
+      --carte: rgba(255, 248, 230, 0.09);
+      --texte: #fff4d8;
+      --or: #d8a331;
+      --rouge: #b9372b;
+      --ombre: rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: var(--texte);
+      background:
+        radial-gradient(circle at top left, #7b2e1f 0, transparent 28%),
+        radial-gradient(circle at bottom right, #1f4a5a 0, transparent 35%),
+        linear-gradient(135deg, #120b08, #24170d 48%, #0b1116);
+      display: flex;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 760px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      box-shadow: 0 22px 60px var(--ombre);
+      overflow: hidden;
+    }
+
+    header {
+      padding: 26px 20px 18px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(90deg, rgba(216,163,49,0.15), rgba(185,55,43,0.12));
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--or);
+      font-size: clamp(28px, 8vw, 46px);
+      letter-spacing: 1px;
+      text-shadow: 2px 3px 0 #000;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    main { padding: 18px; }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .info, .rules {
+      background: var(--carte);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 14px;
+      line-height: 1.45;
+    }
+
+    .info strong { color: var(--or); }
+
+    .board {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      padding: 10px;
+    }
+
+    .guess {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .peg, .choice, .mini {
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.35);
+      box-shadow: inset -4px -5px 8px rgba(0,0,0,0.28), inset 3px 3px 6px rgba(255,255,255,0.25);
+    }
+
+    .peg {
+      width: 42px;
+      height: 42px;
+      background: rgba(255,255,255,0.14);
+    }
+
+    .choice {
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      transition: transform 0.15s, outline 0.15s;
+    }
+
+    .choice:hover, .choice.selected {
+      transform: translateY(-3px) scale(1.05);
+      outline: 3px solid var(--or);
+    }
+
+    .feedback {
+      width: 78px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+
+    .mini {
+      width: 18px;
+      height: 18px;
+      background: rgba(255,255,255,0.18);
+      border-width: 1px;
+    }
+
+    .controls {
+      background: rgba(0,0,0,0.24);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px;
+      padding: 16px;
+      margin-top: 18px;
+    }
+
+    .palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .current {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 13px 16px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #211507;
+      background: linear-gradient(135deg, #ffd56d, #c98d20);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.32);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary {
+      background: linear-gradient(135deg, #f3e6c5, #b4a17e);
+    }
+
+    .message {
+      text-align: center;
+      min-height: 28px;
+      color: #ffe39a;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+
+    .secret {
+      display: none;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .signature {
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.75;
+      padding: 0 18px 18px;
+    }
+
+    .rouge { background: #c0392b; }
+    .bleu { background: #2874a6; }
+    .jaune { background: #f4d03f; }
+    .vert { background: #229954; }
+    .violet { background: #7d3c98; }
+    .orange { background: #e67e22; }
+    .noir { background: #050505; }
+    .blanc { background: #f7f0dd; }
+
+    @media (max-width: 650px) {
+      body { padding: 8px; }
+      .topbar { grid-template-columns: 1fr; }
+      main { padding: 12px; }
+      .peg { width: 36px; height: 36px; }
+      .choice { width: 40px; height: 40px; }
+      .row { grid-template-columns: 1fr 68px; }
+      .feedback { width: 62px; }
+      .buttons { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Mastermind</h1>
+      <p class="subtitle">Édition Claudius Art Studio — logique, couleurs et mystère</p>
+    </header>
+
+    <main>
+      <section class="topbar">
+        <div class="info">
+          <strong>But du jeu :</strong><br>
+          Retrouver la combinaison secrète de 4 couleurs en 10 essais maximum.
+        </div>
+        <div class="rules">
+          ⚫ Noir : bonne couleur au bon endroit.<br>
+          ⚪ Blanc : bonne couleur mal placée.
+        </div>
+      </section>
+
+      <div class="board" id="board"></div>
+
+      <section class="controls">
+        <div class="palette" id="palette"></div>
+        <div class="current" id="current"></div>
+        <div class="buttons">
+          <button onclick="validateGuess()">Valider l’essai</button>
+          <button class="secondary" onclick="clearCurrent()">Effacer</button>
+          <button class="secondary" onclick="newGame()">Nouvelle partie</button>
+          <button class="secondary" onclick="showSecret()">Voir la solution</button>
+        </div>
+        <div class="message" id="message"></div>
+        <div class="secret" id="secret"></div>
+      </section>
+    </main>
+
+    <div class="signature">© Claudius Art Studio — jeu personnel</div>
+  </div>
+
+  <script>
+    const colors = [
+      { name: 'rouge', label: 'Rouge' },
+      { name: 'bleu', label: 'Bleu' },
+      { name: 'jaune', label: 'Jaune' },
+      { name: 'vert', label: 'Vert' },
+      { name: 'violet', label: 'Violet' },
+      { name: 'orange', label: 'Orange' }
+    ];
+
+    const maxTries = 10;
+    const codeLength = 4;
+    let secretCode = [];
+    let currentGuess = [];
+    let attempts = [];
+    let gameOver = false;
+
+    const board = document.getElementById('board');
+    const palette = document.getElementById('palette');
+    const current = document.getElementById('current');
+    const message = document.getElementById('message');
+    const secret = document.getElementById('secret');
+
+    function randomCode() {
+      return Array.from({ length: codeLength }, () => colors[Math.floor(Math.random() * colors.length)].name);
+    }
+
+    function newGame() {
+      secretCode = randomCode();
+      currentGuess = [];
+      attempts = [];
+      gameOver = false;
+      message.textContent = 'Nouvelle partie : choisis 4 couleurs.';
+      secret.style.display = 'none';
+      secret.innerHTML = '';
+      renderAll();
+    }
+
+    function renderPalette() {
+      palette.innerHTML = '';
+      colors.forEach(c => {
+        const div = document.createElement('div');
+        div.className = `choice ${c.name}`;
+        div.title = c.label;
+        div.onclick = () => addColor(c.name);
+        palette.appendChild(div);
+      });
+    }
+
+    function renderCurrent() {
+      current.innerHTML = '';
+      for (let i = 0; i < codeLength; i++) {
+        const peg = document.createElement('div');
+        peg.className = 'peg' + (currentGuess[i] ? ' ' + currentGuess[i] : '');
+        current.appendChild(peg);
+      }
+    }
+
+    function renderBoard() {
+      board.innerHTML = '';
+      for (let i = 0; i < maxTries; i++) {
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const guessBox = document.createElement('div');
+        guessBox.className = 'guess';
+
+        const attempt = attempts[i];
+        for (let j = 0; j < codeLength; j++) {
+          const peg = document.createElement('div');
+          peg.className = 'peg' + (attempt ? ' ' + attempt.guess[j] : '');
+          guessBox.appendChild(peg);
+        }
+
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+
+        let minis = [];
+        if (attempt) {
+          for (let n = 0; n < attempt.black; n++) minis.push('noir');
+          for (let w = 0; w < attempt.white; w++) minis.push('blanc');
+        }
+
+        for (let k = 0; k < codeLength; k++) {
+          const mini = document.createElement('div');
+          mini.className = 'mini' + (minis[k] ? ' ' + minis[k] : '');
+          feedback.appendChild(mini);
+        }
+
+        row.appendChild(guessBox);
+        row.appendChild(feedback);
+        board.appendChild(row);
+      }
+    }
+
+    function renderAll() {
+      renderPalette();
+      renderCurrent();
+      renderBoard();
+    }
+
+    function addColor(color) {
+      if (gameOver) return;
+      if (currentGuess.length >= codeLength) return;
+      currentGuess.push(color);
+      renderCurrent();
+    }
+
+    function clearCurrent() {
+      if (gameOver) return;
+      currentGuess = [];
+      renderCurrent();
+      message.textContent = 'Essai effacé.';
+    }
+
+    function checkGuess(guess, secret) {
+      let black = 0;
+      let white = 0;
+      const secretRest = [];
+      const guessRest = [];
+
+      for (let i = 0; i < codeLength; i++) {
+        if (guess[i] === secret[i]) {
+          black++;
+        } else {
+          secretRest.push(secret[i]);
+          guessRest.push(guess[i]);
+        }
+      }
+
+      guessRest.forEach(color => {
+        const index = secretRest.indexOf(color);
+        if (index !== -1) {
+          white++;
+          secretRest.splice(index, 1);
+        }
+      });
+
+      return { black, white };
+    }
+
+    function validateGuess() {
+      if (gameOver) return;
+
+      if (currentGuess.length < codeLength) {
+        message.textContent = 'Choisis 4 couleurs avant de valider.';
+        return;
+      }
+
+      const result = checkGuess(currentGuess, secretCode);
+      attempts.unshift({ guess: [...currentGuess], black: result.black, white: result.white });
+
+      if (result.black === codeLength) {
+        gameOver = true;
+        message.textContent = 'Bravo ! Tu as trouvé la combinaison secrète.';
+        showSecret();
+      } else if (attempts.length >= maxTries) {
+        gameOver = true;
+        message.textContent = 'Partie terminée. La combinaison était cachée dans l’ombre...';
+        showSecret();
+      } else {
+        message.textContent = `${result.black} noir(s), ${result.white} blanc(s). Continue !`;
+      }
+
+      currentGuess = [];
+      renderCurrent();
+      renderBoard();
+    }
+
+    function showSecret() {
+      secret.innerHTML = '';
+      secretCode.forEach(c => {
+        const peg = document.createElement('div');
+        peg.className = 'peg ' + c;
+        secret.appendChild(peg);
+      });
+      secret.style.display = 'flex';
+    }
+
+    newGame();
+  </script>
+</body>
+</html>
