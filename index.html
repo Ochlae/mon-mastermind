@@ -56,7 +56,7 @@
     .logo {
       width: 180px;
       display: block;
-      margin: 0 auto 120px;
+      margin: 0 auto 12px;
     }
 
     h1 {
@@ -351,54 +351,17 @@
       }
     }
 
-  function renderBoard() {
-  board.innerHTML = '';
+    function renderBoard() {
+      board.innerHTML = '';
 
-  for (let ligne = maxTries - 1; ligne >= 0; ligne--) {
-    const row = document.createElement('div');
-    row.className = 'row';
-
-    const guessBox = document.createElement('div');
-    guessBox.className = 'guess';
-
-    const attempt = attempts[ligne];
-
-    for (let j = 0; j < codeLength; j++) {
-      const peg = document.createElement('div');
-      peg.className = 'peg' + (attempt ? ' ' + attempt.guess[j] : '');
-      guessBox.appendChild(peg);
-    }
-
-    const feedback = document.createElement('div');
-    feedback.className = 'feedback';
-
-    let minis = [];
-
-    if (attempt) {
-      for (let n = 0; n < attempt.black; n++) minis.push('noir');
-      for (let w = 0; w < attempt.white; w++) minis.push('blanc');
-    }
-
-    for (let k = 0; k < codeLength; k++) {
-      const mini = document.createElement('div');
-      mini.className = 'mini' + (minis[k] ? ' ' + minis[k] : '');
-      feedback.appendChild(mini);
-    }
-
-    row.appendChild(guessBox);
-    row.appendChild(feedback);
-    board.appendChild(row);
-  }
-}
-
-    for (let i = maxTries - 1; i >= 0; i--) {
+      for (let ligne = maxTries - 1; ligne >= 0; ligne--) {
         const row = document.createElement('div');
         row.className = 'row';
 
         const guessBox = document.createElement('div');
         guessBox.className = 'guess';
 
-        const attempt = attempts[i];
+        const attempt = attempts[ligne];
 
         for (let j = 0; j < codeLength; j++) {
           const peg = document.createElement('div');
@@ -457,7 +420,7 @@
       const secretRest = [];
       const guessRest = [];
 
-      for (let i = maxTries - 1; i >= 0; i--) {
+      for (let i = 0; i < codeLength; i++) {
         if (guess[i] === secret[i]) {
           black++;
         } else {
