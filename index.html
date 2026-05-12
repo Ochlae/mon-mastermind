@@ -451,7 +451,7 @@
 
       const result = checkGuess(currentGuess, secretCode);
 
-      attempts.unshift({
+      attempts.push({
         guess: [...currentGuess],
         black: result.black,
         white: result.white
