@@ -310,11 +310,12 @@
     const secret = document.getElementById('secret');
 
     function randomCode() {
-      return Array.from(
-        { length: codeLength },
-        () => colors[Math.floor(Math.random() * colors.length)].name
-      );
-    }
+  const couleursMelangees = [...colors].sort(() => Math.random() - 0.5);
+
+  return couleursMelangees
+    .slice(0, codeLength)
+    .map(couleur => couleur.name);
+}
 
     function newGame() {
       secretCode = randomCode();
